@@ -10,7 +10,7 @@
 if ( { $PEEPDIR/joos $* } )  then
   foreach f ( $* )
     if ( $f != "-O" && $f:e != "joos" ) then
-      java -jar /home/2015/kstric/520/COMP520_peephole/jasmin.jar $f:r.j 
+      java -jar /Users/kstricks/Documents/McGill/4thyear/second_term/520/assignments/peephole/PeepholeContest/jasmin.jar $f:r.j 
     endif
   end
 endif

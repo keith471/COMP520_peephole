@@ -1,6 +1,9 @@
 all: clean
 	$(PEEPDIR)/joosc BacktrackSolver.java SudokuSolver.java Benchmark.java
 
+optimized: clean
+	$(PEEPDIR)/joosc -O *.java
+
 java:
 	javac BacktrackSolver.java SudokuSolver.java Benchmark.java
 

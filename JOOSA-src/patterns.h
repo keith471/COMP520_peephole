@@ -114,6 +114,36 @@ int simplify_istore(CODE **c) {
   return 0;
 }
 
+/* iconst_0
+ * goto L1
+ * ...
+ * L1:
+ * ifeq L2
+ * ...
+ * L2:
+ * ----------->
+ * goto L2
+ * ...
+ * L1
+ * ifeq L2
+ * ...
+ * L2:
+ *
+ * In the above case, we always branch from L1 to L2 because we put a 0 on
+ * the stack right before go to L1. Thus its better to just branch to L2. We
+ * don't remove the ifeq L2 line in L1 because it might be needed by other callers.
+ */
+int simplify_istore_0_double_branch(CODE **c) {
+  int x, l1, l2;
+  if (is_ldc_int(*c, &x) &&
+      x == 0 &&
+      is_goto(next(*c), &l1) &&
+      is_ifeq(next(destination(l1)), &l2)) {
+    return replace(c, 2, makeCODEgoto(l2, NULL));
+  }
+  return 0;
+}
+
 
 void init_patterns(void) {
   ADD_PATTERN(simplify_multiplication_right);
@@ -121,4 +151,5 @@ void init_patterns(void) {
   ADD_PATTERN(positive_increment);
   ADD_PATTERN(simplify_goto_goto);
   ADD_PATTERN(simplify_istore);
+  ADD_PATTERN(simplify_istore_0_double_branch);
 }

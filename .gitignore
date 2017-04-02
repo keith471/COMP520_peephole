@@ -1,1 +1,6 @@
 .joosc
+JOOSA-src/*.o
+JOOSA-src/joos
+JOOSA-src/lex.yy.c
+JOOSA-src/y.tab.*
+test/*

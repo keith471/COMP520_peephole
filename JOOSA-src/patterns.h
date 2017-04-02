@@ -116,9 +116,9 @@ int simplify_istore(CODE **c) {
 
 
 void init_patterns(void) {
-	ADD_PATTERN(simplify_multiplication_right);
-	ADD_PATTERN(simplify_astore);
-	ADD_PATTERN(positive_increment);
-	ADD_PATTERN(simplify_goto_goto);
+  ADD_PATTERN(simplify_multiplication_right);
+  ADD_PATTERN(simplify_astore);
+  ADD_PATTERN(positive_increment);
+  ADD_PATTERN(simplify_goto_goto);
   ADD_PATTERN(simplify_istore);
 }

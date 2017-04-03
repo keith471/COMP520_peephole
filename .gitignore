@@ -1,4 +1,6 @@
 .joosc
+./joosc
+PeepholeBenchmarks/
 JOOSA-src/*.o
 JOOSA-src/joos
 JOOSA-src/lex.yy.c

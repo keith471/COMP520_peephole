@@ -286,6 +286,18 @@ int remove_self_div(CODE **c) {
   return 0;
 }
 
+/* nop
+ * ------->
+ *
+ * Remove pointlness nop's which sometimes sneak in.
+ */
+int remove_nop(CODE **c) {
+  if(is_nop(*c)) {
+    return replace(c, 1, NULL);
+  }
+  return 0;
+}
+
 /* iconst_x | ldc x
  * iadd
  * iconst_x | ldc x
@@ -377,4 +389,5 @@ void init_patterns(void) {
   ADD_PATTERN(remove_pointless_sub_add);
   ADD_PATTERN(remove_dead_label);
   ADD_PATTERN(remove_self_div);
+  ADD_PATTERN(remove_nop);
 }

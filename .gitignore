@@ -1,5 +1,9 @@
 .joosc
-PeepholeBenchmarks/
+PeepholeBenchmarks/*/*.class
+PeepholeBenchmarks/*/*.j
+PeepholeBenchmarks/*/*.java
+PeepholeBenchmarks/*/*.dump
+PeepholeBenchmarks/*/*.optdump
 JOOSA-src/*.o
 JOOSA-src/joos
 JOOSA-src/lex.yy.c

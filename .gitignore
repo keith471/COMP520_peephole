@@ -9,5 +9,6 @@ JOOSA-src/joos
 JOOSA-src/lex.yy.c
 JOOSA-src/y.tab.*
 JOOSA-src/.tags*
+JOOSA-src/Makefile
 test/*
 *.class

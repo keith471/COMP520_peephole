@@ -25,19 +25,13 @@
   putfield SudokuSolver/grid Ljava/util/Vector;
   pop
   iconst_0
-  dup
   istore_2
-  pop
   start_0:
   iload_2
   ldc 9
   if_icmplt true_2
-  iconst_0
-  goto stop_3
+  goto stop_1
   true_2:
-  iconst_1
-  stop_3:
-  ifeq stop_1
   aload_0
   getfield SudokuSolver/grid Ljava/util/Vector;
   new java/util/Vector
@@ -46,19 +40,13 @@
   invokenonvirtual java/util/Vector/<init>(I)V
   invokevirtual java/util/Vector/addElement(Ljava/lang/Object;)V
   iconst_0
-  dup
   istore_3
-  pop
   start_4:
   iload_3
   ldc 9
   if_icmplt true_6
-  iconst_0
-  goto stop_7
+  goto stop_5
   true_6:
-  iconst_1
-  stop_7:
-  ifeq stop_5
   aload_0
   getfield SudokuSolver/grid Ljava/util/Vector;
   iload_2
@@ -69,9 +57,7 @@
   astore 5
   aload_1
   invokevirtual joos/lib/JoosIO/readInt()I
-  dup
   istore 6
-  pop
   new java/lang/Integer
   dup
   iload 6
@@ -80,20 +66,10 @@
   aload 5
   aload 7
   invokevirtual java/util/Vector/addElement(Ljava/lang/Object;)V
-  iload_3
-  iconst_1
-  iadd
-  dup
-  istore_3
-  pop
+  iinc 3 1
   goto start_4
   stop_5:
-  iload_2
-  iconst_1
-  iadd
-  dup
-  istore_2
-  pop
+  iinc 2 1
   goto start_0
   stop_1:
   return
@@ -106,41 +82,25 @@
   .limit locals 12
   .limit stack 3
   iconst_0
-  dup
   istore 4
-  pop
   iconst_0
-  dup
   istore_2
-  pop
   start_0:
   iload_2
   ldc 12
   if_icmplt true_2
-  iconst_0
-  goto stop_3
+  goto stop_1
   true_2:
-  iconst_1
-  stop_3:
-  ifeq stop_1
   iconst_0
-  dup
   istore 5
-  pop
   iconst_0
-  dup
   istore_3
-  pop
   start_4:
   iload_3
   ldc 13
   if_icmplt true_6
-  iconst_0
-  goto stop_7
+  goto stop_5
   true_6:
-  iconst_1
-  stop_7:
-  ifeq stop_5
   iload_2
   iconst_0
   if_icmpeq true_12
@@ -241,12 +201,7 @@
   iload 5
   invokevirtual java/util/Vector/elementAt(I)Ljava/lang/Object;
   astore 6
-  iload 5
-  iconst_1
-  iadd
-  dup
-  istore 5
-  pop
+  iinc 5 1
   new java/lang/Integer
   dup
   iconst_0
@@ -258,12 +213,8 @@
   aload 7
   aload 8
   if_acmpne true_33
-  iconst_0
-  goto stop_34
+  goto else_31
   true_33:
-  iconst_1
-  stop_34:
-  ifeq else_31
   aload 7
   invokevirtual java/lang/Integer/toString()Ljava/lang/String;
   astore 9
@@ -278,12 +229,7 @@
   stop_32:
   stop_19:
   stop_9:
-  iload_3
-  iconst_1
-  iadd
-  dup
-  istore_3
-  pop
+  iinc 3 1
   goto start_4
   stop_5:
   iload_2
@@ -319,22 +265,12 @@
   stop_43:
   false_36:
   ifeq stop_35
-  iload 4
-  iconst_1
-  iadd
-  dup
-  istore 4
-  pop
+  iinc 4 1
   stop_35:
   aload_1
   ldc "\n"
   invokevirtual joos/lib/JoosIO/print(Ljava/lang/String;)V
-  iload_2
-  iconst_1
-  iadd
-  dup
-  istore_2
-  pop
+  iinc 2 1
   goto start_0
   stop_1:
   return

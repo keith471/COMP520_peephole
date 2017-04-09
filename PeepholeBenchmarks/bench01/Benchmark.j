@@ -23,12 +23,8 @@
   aload_2
   ldc "backtrack"
   if_acmpeq true_2
-  iconst_0
-  goto stop_3
+  goto else_0
   true_2:
-  iconst_1
-  stop_3:
-  ifeq else_0
   new BacktrackSolver
   dup
   invokenonvirtual BacktrackSolver/<init>()V
@@ -38,12 +34,8 @@
   aload_2
   ldc "bruteforce"
   if_acmpeq true_6
-  iconst_0
-  goto stop_7
+  goto else_4
   true_6:
-  iconst_1
-  stop_7:
-  ifeq else_4
   new BacktrackSolver
   dup
   invokenonvirtual BacktrackSolver/<init>()V

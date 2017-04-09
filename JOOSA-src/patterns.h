@@ -83,6 +83,47 @@ int simplify_multiplication_right(CODE **c)
   return 0;
 }
 
+/*
+ * Might as well do the same as the above but for the left
+ */
+int simplify_multiplication_left(CODE **c) {
+    int x, k;
+    if (is_ldc_int(*c, &x) && is_iload(next(*c), &k) && is_imul(next(next(*c)))) {
+        if (x == 0) return replace(c, 3, makeCODEldc_int(0, NULL));
+        else if (x == 1) return replace(c, 3, makeCODEiload(k, NULL));
+        else if (x == 2) return replace(c, 3, makeCODEiload(k, makeCODEdup(makeCODEiadd(NULL))));
+        return 0;
+    }
+    return 0;
+}
+
+/*
+ * Similar for addition
+ */
+int simplify_addition_right(CODE **c) {
+    int x, y, k;
+    if (is_iload(*c, &x) &&
+            is_ldc_int(next(*c), &k) &&
+            is_iadd(next(next(*c))) &&
+            !is_dup(next(next(next(*c))))) {
+        if (k == 0) return replace(c, 3, makeCODEiload(x, NULL));
+        return 0;
+    }
+    return 0;
+}
+
+int simplify_addition_left(CODE **c) {
+    int x, y, k;
+    if (is_ldc_int(*c, &x) &&
+            is_iload(next(*c), &k) &&
+            is_iadd(next(next(*c))) &&
+            !is_dup(next(next(next(*c))))) {
+        if (x == 0) return replace(c, 3, makeCODEiload(k, NULL));
+        return 0;
+    }
+    return 0;
+}
+
 /* dup
  * astore x
  * pop
@@ -114,7 +155,13 @@ int positive_increment(CODE **c)
       is_istore(next(next(next(*c))),&y) &&
       x==y && 0<=k && k<=127) {
      return replace(c,4,makeCODEiinc(x,k,NULL));
-  }
+ } else if (is_ldc_int(*c,&x) &&
+     is_iload(next(*c),&k) &&
+     is_iadd(next(next(*c))) &&
+     is_istore(next(next(next(*c))),&y) &&
+     k==y && 0<=x && x<=127) {
+    return replace(c,4,makeCODEiinc(k,x,NULL));
+ }
   return 0;
 }
 
@@ -378,10 +425,15 @@ int remove_dead_label(CODE **c) {
 
 void init_patterns(void) {
   ADD_PATTERN(simplify_multiplication_right);
+  ADD_PATTERN(simplify_multiplication_left);
+  ADD_PATTERN(simplify_addition_right);
+  ADD_PATTERN(simplify_addition_left);
+  //ADD_PATTERN(simplify_subtraction_right);
+  //ADD_PATTERN(simplify_subtraction_left);
   ADD_PATTERN(simplify_astore);
+  ADD_PATTERN(simplify_istore);
   ADD_PATTERN(positive_increment);
   ADD_PATTERN(simplify_goto_goto);
-  ADD_PATTERN(simplify_istore);
   ADD_PATTERN(simplify_istore_0_double_branch);
   ADD_PATTERN(remove_superfluous_storeloads);
   ADD_PATTERN(remove_pointless_mul_div);

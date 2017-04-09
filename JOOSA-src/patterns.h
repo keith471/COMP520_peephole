@@ -573,7 +573,12 @@ int get_true_label(int l) {
 int remove_unnecessary_label_traversal(CODE **c) {
     int x;
     int l1, l2, l3;
-    if (is_if_icmpeq(*c, &l1) &&
+    if ((is_if_icmpeq(*c, &l1) ||
+            is_if_icmpne(*c, &l1) ||
+            is_if_icmpge(*c, &l1) ||
+            is_if_icmple(*c, &l1) ||
+            is_if_icmpgt(*c, &l1) ||
+            is_if_icmplt(*c, &l1)) &&
             is_ldc_int(next(destination(l1)), &x) &&
             x == 1 &&
             is_label(next(next(destination(l1))), &l2) &&
@@ -583,17 +588,46 @@ int remove_unnecessary_label_traversal(CODE **c) {
         int trueLabel = get_true_label(l3);
         if (trueLabel != -1) {
             if (is_if_icmpeq(*c, &l1)) {
-                /* change c to be if_icmpeq trueLabel */
                 replace(c, 1, makeCODEif_icmpeq(trueLabel, NULL));
-                copylabel(trueLabel);
-                /* if l1 is unique, drop it and drop its following line iconst_1 */
-                if (uniquelabel(l1)) {
-                    droplabel(l1);
-                    destination(l1)->next = next(destination(l1))->next;
-                }
-                return 1;
+            } else if (is_if_icmpne(*c, &l1)) {
+                replace(c, 1, makeCODEif_icmpne(trueLabel, NULL));
+            } else if (is_if_icmpge(*c, &l1)) {
+                replace(c, 1, makeCODEif_icmpge(trueLabel, NULL));
+            } else if (is_if_icmple(*c, &l1)) {
+                replace(c, 1, makeCODEif_icmple(trueLabel, NULL));
+            } else if (is_if_icmpgt(*c, &l1)) {
+                replace(c, 1, makeCODEif_icmpgt(trueLabel, NULL));
+            } else {
+                replace(c, 1, makeCODEif_icmplt(trueLabel, NULL));
             }
+            copylabel(trueLabel);
+            /* if l1 is unique, drop it and drop its following line iconst_1 */
+            if (uniquelabel(l1)) {
+                droplabel(l1);
+                destination(l1)->next = next(destination(l1))->next;
+            }
+            return 1;
         }
+    }
+    return 0;
+}
+
+/*
+ * iconst_0
+ * dup
+ * ifne true_3
+ * pop
+ */
+int remove_useless_branch(CODE **c) {
+    int x;
+    int l;
+    if (is_ldc_int(*c, &x) &&
+            x == 0 &&
+            is_dup(next(*c)) &&
+            is_ifne(next(next(*c)), &l) &&
+            is_pop(next(next(next(*c))))) {
+        droplabel(l);
+        return replace(c, 4, NULL);
     }
     return 0;
 }
@@ -615,7 +649,12 @@ int remove_unnecessary_label_traversal(CODE **c) {
 int simplify_end_of_conditional(CODE **c) {
     int x;
     int l1, l2, l3;
-    if (is_if_icmpeq(*c, &l1) &&
+    if ((is_if_icmpeq(*c, &l1) ||
+            is_if_icmpne(*c, &l1) ||
+            is_if_icmpge(*c, &l1) ||
+            is_if_icmple(*c, &l1) ||
+            is_if_icmpgt(*c, &l1) ||
+            is_if_icmplt(*c, &l1)) &&
             is_ldc_int(next(destination(l1)), &x) &&
             x == 1 &&
             is_label(next(next(destination(l1))), &l2) &&
@@ -626,7 +665,19 @@ int simplify_end_of_conditional(CODE **c) {
         /* record the label in the labels table */
         INSERTnewlabel(nextLabel, "optlabel", newLabel, 1);
         /* have c point to the new label instead of true_10 */
-        replace(c, 1, makeCODEif_icmpeq(nextLabel, NULL));
+        if (is_if_icmpeq(*c, &l1)) {
+            replace(c, 1, makeCODEif_icmpeq(nextLabel, NULL));
+        } else if (is_if_icmpne(*c, &l1)) {
+            replace(c, 1, makeCODEif_icmpne(nextLabel, NULL));
+        } else if (is_if_icmpge(*c, &l1)) {
+            replace(c, 1, makeCODEif_icmpge(nextLabel, NULL));
+        } else if (is_if_icmple(*c, &l1)) {
+            replace(c, 1, makeCODEif_icmple(nextLabel, NULL));
+        } else if (is_if_icmpgt(*c, &l1)) {
+            replace(c, 1, makeCODEif_icmpgt(nextLabel, NULL));
+        } else {
+            replace(c, 1, makeCODEif_icmplt(nextLabel, NULL));
+        }
         /* add the new label after ifeq stop_0 */
         next(next(next(destination(l1))))->next = newLabel;
 
@@ -682,4 +733,5 @@ void init_patterns(void) {
   ADD_PATTERN(simplify_end_of_conditional);
   ADD_PATTERN(remove_unnecessary_label_traversal); /* must come after simplify_end_of_conditional */
   ADD_PATTERN(remove_unnecessary_goto);
+  ADD_PATTERN(remove_useless_branch);
 }

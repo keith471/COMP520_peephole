@@ -62,9 +62,10 @@
   iload_3
   invokevirtual BacktrackSolver/getVal(II)I
   iload_2
-  if_icmpeq true_5
+  if_icmpeq optlabel_7
   goto stop_4
-  true_5:
+  ifeq stop_4
+  optlabel_7:
   iconst_0
   ireturn
   stop_4:
@@ -91,9 +92,10 @@
   iload_1
   invokevirtual BacktrackSolver/getVal(II)I
   iload_2
-  if_icmpeq true_5
+  if_icmpeq optlabel_7
   goto stop_4
-  true_5:
+  ifeq stop_4
+  optlabel_7:
   iconst_0
   ireturn
   stop_4:
@@ -144,9 +146,10 @@
   iadd
   invokevirtual BacktrackSolver/getVal(II)I
   iload_3
-  if_icmpeq true_9
+  if_icmpeq optlabel_11
   goto stop_8
-  true_9:
+  ifeq stop_8
+  optlabel_11:
   iconst_0
   ireturn
   stop_8:
@@ -184,9 +187,10 @@
   iload_2
   invokevirtual BacktrackSolver/getVal(II)I
   iconst_0
-  if_icmpeq true_9
+  if_icmpeq optlabel_11
   goto stop_8
-  true_9:
+  ifeq stop_8
+  optlabel_11:
   iconst_0
   ireturn
   stop_8:
@@ -274,14 +278,13 @@
   aload_0
   invokevirtual BacktrackSolver/checkFinish()Z
   ifeq true_16
-  goto stop_15
+  goto stop_2
   true_16:
   aload_0
   iload_1
   iload_2
   iconst_0
   invokevirtual BacktrackSolver/setVal(III)V
-  stop_15:
   stop_2:
   return
 .end method

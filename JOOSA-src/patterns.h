@@ -530,8 +530,128 @@ int remove_unnecessary_label(CODE **c) {
     if (is_goto(*c, &l1) && uniquelabel(l1) && is_label(next(destination(l1)), &l2) && l1 > l2) {
         droplabel(l1);
         copylabel(l2);
-        //replace(&destination(l1), 1, NULL);
         return replace(c, 1, makeCODEgoto(l2, NULL));
+    }
+    return 0;
+}
+
+/*
+ * helper for remove_unnecessary_label_traversal
+ *
+ * traverses through code of the following form, returning the label true_1:
+ * true_3:
+ * dup
+ * ifne true_2
+ * ...
+ * true_2:
+ * dup
+ * ifne true_1
+ * ...
+ * true_1:
+ * ifeq stop_0
+ * optlabel_x:
+ */
+int get_true_label(int l) {
+    int stopLabel;
+    int retLabel;
+    int nextLabel = l;
+    while (is_dup(next(destination(nextLabel))) &&
+            is_ifne(next(next(destination(nextLabel))), &nextLabel)) {
+    }
+
+    /* nextLabel is true_1 */
+    if (is_ifeq(next(destination(nextLabel)), &stopLabel) && is_label(next(next(destination(nextLabel))), &retLabel)) {
+        return retLabel;
+    } else {
+        return -1;
+    }
+}
+
+/*
+ *
+ */
+int remove_unnecessary_label_traversal(CODE **c) {
+    int x;
+    int l1, l2, l3;
+    if (is_if_icmpeq(*c, &l1) &&
+            is_ldc_int(next(destination(l1)), &x) &&
+            x == 1 &&
+            is_label(next(next(destination(l1))), &l2) &&
+            is_dup(next(next(next(destination(l1))))) &&
+            is_ifne(next(next(next(next(destination(l1))))), &l3)) {
+        /* get the label to update this label with */
+        int trueLabel = get_true_label(l3);
+        if (trueLabel != -1) {
+            if (is_if_icmpeq(*c, &l1)) {
+                /* change c to be if_icmpeq trueLabel */
+                replace(c, 1, makeCODEif_icmpeq(trueLabel, NULL));
+                copylabel(trueLabel);
+                /* if l1 is unique, drop it and drop its following line iconst_1 */
+                if (uniquelabel(l1)) {
+                    droplabel(l1);
+                    destination(l1)->next = next(destination(l1))->next;
+                }
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+/*
+ * if_icmpeq true_10
+ * ...
+ * true_10:
+ * iconst_1
+ * true_1:
+ * ifeq stop_0
+ * ----------------->
+ * if_icmpeq true_x
+ * ...
+ * true_1:
+ * ifeq stop_0
+ * true_x:
+ */
+int simplify_end_of_conditional(CODE **c) {
+    int x;
+    int l1, l2, l3;
+    if (is_if_icmpeq(*c, &l1) &&
+            is_ldc_int(next(destination(l1)), &x) &&
+            x == 1 &&
+            is_label(next(next(destination(l1))), &l2) &&
+            is_ifeq(next(next(next(destination(l1)))), &l3)) {
+        /* make a new label */
+        int nextLabel = next_label();
+        CODE* newLabel = makeCODElabel(nextLabel, next(next(next(next(destination(l1))))));
+        /* record the label in the labels table */
+        INSERTnewlabel(nextLabel, "optlabel", newLabel, 1);
+        /* have c point to the new label instead of true_10 */
+        replace(c, 1, makeCODEif_icmpeq(nextLabel, NULL));
+        /* add the new label after ifeq stop_0 */
+        next(next(next(destination(l1))))->next = newLabel;
+
+        /* other optimizations...
+         * if true_10 is unique, drop it and drop its following line iconst_1
+         */
+        if (uniquelabel(l1)) {
+            droplabel(l1);
+            destination(l1)->next = next(destination(l1))->next;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+/*
+ * after the above simplifications pertaining to conditionals, we might end up with
+ * goto label
+ * label:
+ * In this case, we can clearly remove the goto
+ */
+int remove_unnecessary_goto(CODE **c) {
+    int l1, l2;
+    if (is_goto(*c, &l1) && is_label(next(*c), &l2) && l1 == l2) {
+        return kill_line(c);
     }
     return 0;
 }
@@ -559,4 +679,7 @@ void init_patterns(void) {
   ADD_PATTERN(remove_self_div);
   ADD_PATTERN(remove_nop);
   ADD_PATTERN(remove_unnecessary_label);
+  ADD_PATTERN(simplify_end_of_conditional);
+  ADD_PATTERN(remove_unnecessary_label_traversal); /* must come after simplify_end_of_conditional */
+  ADD_PATTERN(remove_unnecessary_goto);
 }

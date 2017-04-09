@@ -515,6 +515,27 @@ int remove_dead_label(CODE **c) {
   return 0;
 }
 
+/*
+ * goto l1
+ * ...
+ * l1:
+ * l2:
+ * ------->
+ * goto l2
+ * ...
+ * l2
+ */
+int remove_unnecessary_label(CODE **c) {
+    int l1, l2;
+    if (is_goto(*c, &l1) && uniquelabel(l1) && is_label(next(destination(l1)), &l2) && l1 > l2) {
+        droplabel(l1);
+        copylabel(l2);
+        //replace(&destination(l1), 1, NULL);
+        return replace(c, 1, makeCODEgoto(l2, NULL));
+    }
+    return 0;
+}
+
 void init_patterns(void) {
   ADD_PATTERN(simplify_multiplication_right);
   ADD_PATTERN(simplify_multiplication_left);
@@ -537,4 +558,5 @@ void init_patterns(void) {
   ADD_PATTERN(remove_dead_label);
   ADD_PATTERN(remove_self_div);
   ADD_PATTERN(remove_nop);
+  ADD_PATTERN(remove_unnecessary_label);
 }

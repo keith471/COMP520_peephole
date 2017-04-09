@@ -10,13 +10,11 @@ public class BFRoomAction extends RoomAction{
     }
 
     public int performAction(String inputString){
-        if (inputString.indexOf("use", 0) >= 0 || 
+        if (inputString.indexOf("use", 0) >= 0 ||
                 inputString.indexOf("operate", 0) >= 0 ||
-                inputString.indexOf("interact", 0) >= 0 ||
-                inputString.indexOf("press", 0) >= 0 ||
-                inputString.indexOf("push", 0) >= 0){
+                inputString.indexOf("interact", 0) >= 0){
             O.println("Hello World");
-            return 0; 
+            return 0;
         }else{
             return this.performBaseAction(inputString);
         }

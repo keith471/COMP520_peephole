@@ -99,9 +99,14 @@ int simplify_multiplication_left(CODE **c) {
 
 /*
  * Similar for addition
+ * iload x
+ * ldc 0
+ * iadd
+ * ------->
+ * iload x
  */
 int simplify_addition_right(CODE **c) {
-    int x, y, k;
+    int x, k;
     if (is_iload(*c, &x) &&
             is_ldc_int(next(*c), &k) &&
             is_iadd(next(next(*c))) &&
@@ -113,12 +118,99 @@ int simplify_addition_right(CODE **c) {
 }
 
 int simplify_addition_left(CODE **c) {
-    int x, y, k;
+    int x, k;
     if (is_ldc_int(*c, &x) &&
             is_iload(next(*c), &k) &&
-            is_iadd(next(next(*c))) &&
-            !is_dup(next(next(next(*c))))) {
+            is_iadd(next(next(*c)))) {
         if (x == 0) return replace(c, 3, makeCODEiload(k, NULL));
+        return 0;
+    }
+    return 0;
+}
+
+/*
+ * And subtraction
+ * iload x
+ * ldc 0
+ * isub
+ * ------->
+ * iload x
+ */
+int simplify_subtraction_right(CODE **c) {
+    int x, k;
+    if (is_iload(*c, &x) &&
+            is_ldc_int(next(*c), &k) &&
+            is_isub(next(next(*c)))) {
+        if (k == 0) return replace(c, 3, makeCODEiload(x, NULL));
+        return 0;
+    }
+    return 0;
+}
+
+int simplify_subtraction_left(CODE **c) {
+    int x, k;
+    if (is_ldc_int(*c, &x) &&
+            is_iload(next(*c), &k) &&
+            is_isub(next(next(*c)))) {
+        if (x == 0) return replace(c, 3, makeCODEiload(k, makeCODEineg(NULL)));
+        return 0;
+    }
+    return 0;
+}
+
+/*
+ * And division
+ * iload x      iload x
+ * ldc 1        ldc 2
+ * idiv         idiv
+ * ------->     ------->
+ * iload x      iload x
+ *              ldc 1
+ *              ishl
+ */
+int simplify_division_right(CODE **c) {
+    int x, k;
+    if (is_iload(*c, &x) &&
+            is_ldc_int(next(*c), &k) &&
+            is_idiv(next(next(*c)))) {
+        if (k == 1) return replace(c, 3, makeCODEiload(x, NULL));
+        return 0;
+    }
+    return 0;
+}
+
+/*
+ * ldc 0
+ * iload x
+ * idiv
+ * ------->
+ * iload x
+ */
+int simplify_division_left(CODE **c) {
+    int x, k;
+    if (is_ldc_int(*c, &x) &&
+            is_iload(next(*c), &k) &&
+            is_idiv(next(next(*c)))) {
+        if (x == 0) return replace(c, 3, makeCODEiload(k, NULL));
+        return 0;
+    }
+    return 0;
+}
+
+/*
+ * And finally modulo
+ * iload x
+ * ldc 1
+ * irem
+ * ------->
+ * ldc 0
+ */
+int simplify_modulo_right(CODE **c) {
+    int x, k;
+    if (is_iload(*c, &x) &&
+            is_ldc_int(next(*c), &k) &&
+            is_irem(next(next(*c)))) {
+        if (k == 1) return replace(c, 3, makeCODEldc_int(0, NULL));
         return 0;
     }
     return 0;
@@ -428,8 +520,11 @@ void init_patterns(void) {
   ADD_PATTERN(simplify_multiplication_left);
   ADD_PATTERN(simplify_addition_right);
   ADD_PATTERN(simplify_addition_left);
-  //ADD_PATTERN(simplify_subtraction_right);
-  //ADD_PATTERN(simplify_subtraction_left);
+  ADD_PATTERN(simplify_subtraction_right);
+  ADD_PATTERN(simplify_subtraction_left);
+  ADD_PATTERN(simplify_division_right);
+  ADD_PATTERN(simplify_division_left);
+  ADD_PATTERN(simplify_modulo_right);
   ADD_PATTERN(simplify_astore);
   ADD_PATTERN(simplify_istore);
   ADD_PATTERN(positive_increment);
